@@ -1,0 +1,321 @@
+@import 'animations.scss';
+
+@mixin absoluteCover() {
+	display: block;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+
+@mixin verticalCenter() {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%) translateZ(0);
+}
+
+$primary: #333;
+
+/*
+RESET
+*/
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{font-size:100%;font:inherit;padding:0;border:0;margin:0;vertical-align:baseline;position:relative;}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}table{border-collapse:collapse;border-spacing:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}.clear{clear:both}
+.sticky{}.bypostauthor{}.wp-caption{}.wp-caption-text{}.gallery-caption{}.alignright{}.alignleft{}.aligncenter{}.screen-reader-text{clip:rect(1px, 1px, 1px, 1px);position:absolute !important}div,section,header,nav,footer{display: block; position: relative;}
+section,header,footer,div,input,textarea,button { display: block; box-sizing: border-box; }
+
+html,body { font: normal 16px/1.6 'Raleway', 'Lato', 'Helvetica Neue', 'Segoe UI', sans-serif; height: 100%; color: #333; margin: 0; padding: 0; }
+// body {overflow-x: hidden;}
+body.fixed { position: fixed; }
+
+h1,h2,h3,h4 { color: #fff; }
+h1, h2 { font-weight: 800; font-size: 2.5em; line-height: 1.1; margin-bottom: 15px; }
+h4 { font-weight: 400; font-size: 1.2em; line-height: 1.5; margin-bottom: 10px; }
+
+.btn, button { 
+	display: inline-block; 
+	padding: 12px 20px; 
+	font-weight: 600; 
+	font-size: 1.1em;
+	border: 2px solid $primary;
+	border-radius: 4px;
+	color: #fff;
+	background: $primary;
+	cursor: pointer;
+	margin: 0 10px;
+
+	&.back {
+		border: 2px solid #fff;
+		background: transparent;
+	}
+}
+
+.hero { height: 100%; }
+
+#stage { 
+	width: 100%;
+	overflow: hidden;
+	transition: all 750ms ease-out;
+
+	&.loading { opacity: 0; }
+}
+
+.scene {
+
+	width: 100%;
+	position: relative;
+	overflow: hidden;
+	display: none;
+
+	&.activeScene, &.loadingScene {
+		display: block;
+	}
+
+	&.loadingScene {
+		visibility: hidden;
+	}
+
+	h4 { margin-bottom: 0; }
+
+	// Anything that's going to be moving should go here
+	// Enables hardware acceleration
+	&:before, .background, .foreground, .textWrap {
+		transform: translateZ(0);
+	}
+
+	&:before {
+		content: "";
+		@include absoluteCover();
+		background: #1f4441;
+		opacity: 0;
+		z-index: 2;
+		transition: all 2500ms ease-out;
+	}
+
+	.background, .foreground {
+		@include absoluteCover();
+		background-position: center center;
+		background-size: 100%;
+		background-repeat: no-repeat;
+		z-index: 1;
+	}
+
+	.background {
+		background-image: url('assets/img/hero_01_background.png');
+		background-size: cover;
+		background-position: center top;
+		// top: -80px;
+	}
+
+	.foreground {
+		background-image: url('assets/img/hero_01_foreground.png');
+		background-position: center bottom;
+		top: auto;
+		bottom: -50px;
+		opacity: 0;
+	}
+
+	.question {
+		display: none;
+	}
+
+	.text {
+		width: 100%;
+		z-index: 3;
+	}
+
+	.textWrap {
+		max-width: 850px;
+		text-align: center;
+		margin: 0 auto;
+		padding: 0 30px;
+		top: 40px;
+		opacity: 0;
+	}
+
+	.buttons { text-align: center; padding: 30px 0; bottom: -40px; opacity: 0; }
+
+	.activeQuestion {
+
+		display: block;
+		opacity: 1;
+		top: auto;
+
+		.buttons { 
+			opacity: 1; 
+			bottom: auto; 
+		}
+
+		.textWrap {	
+			animation: textLoadIn 800ms; 
+			animation-timing-function: ease-out;
+			top: auto;
+			opacity: 1;
+		}
+
+		.buttons { 
+			animation: buttonsLoadIn 800ms; 
+			animation-timing-function: ease-out; 
+		}
+
+		&.loadOut {
+			.textWrap, .buttons { 
+				animation: textLoadOut 500ms; 
+				animation-timing-function: ease-out;
+				opacity: 0;
+			}
+		}
+
+	}
+
+}
+
+.activeScene {
+	&:before { animation: overlayLoad 1600ms; opacity: .35; }
+	.foreground { animation: foregroundLoadIn 1600ms; bottom: 0; opacity: 1; }
+	// .activeQuestion.textWrap { opacity: 1; top: 0; }
+}
+
+#sceneList {
+	display: block;
+	padding: 14px 0;
+	font-size: .9em;
+
+	text-align: center;
+	color: #fff;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 5;
+	li { 
+		display: none;
+		&.active {
+			display: block;
+			line-height: 1;
+		}
+	}
+}
+
+#progressBar {
+	display: block;
+	width: 90%;
+	position: absolute;
+	top: 40px;
+	left: 5%;
+	z-index: 5;
+	opacity: 0;
+	transition: all 300ms linear;
+
+	&:before {
+		content: "";
+		display: block;
+		position: absolute;
+		top: 2px;
+		width: 100%;
+		height: 2px;
+		background: #fff;
+		opacity: .4;
+	}
+
+	.slide {
+		display: block;
+		position: absolute;
+		width: 100%;
+		height: 2px;
+		top: 2px;
+		overflow: hidden;
+	}
+
+	.progress {
+		display: block;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		left: -100%;
+		background: #fff;
+		transition: all 800ms ease-in-out;
+		transform-origin: left;
+	}
+
+	.marker {
+		display: block;
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		margin-left: -3px;
+		background: #fff;
+		opacity: .33;
+		border-radius: 6px;
+		transition: opacity 500ms linear;
+
+		&.done {
+			opacity: 1;
+		}
+	}
+
+}
+
+
+
+.fullscreen {
+
+	#stage {
+		height: 100%;
+	}
+
+	.scene {
+
+		height: 100%;
+
+		.text {
+			@include verticalCenter();
+		}
+
+	}
+
+}
+
+
+@media only screen and (max-height: 500px) {
+	
+}
+
+@media only screen and (min-width: 600px) {
+	
+}
+
+@media only screen and (min-width: 768px) {
+	h1 { font-size: 3.5em; }
+	h2 { font-size: 3em; }
+	h4 { font-size: 1.4em; }
+}
+
+@media only screen and (min-width: 1024px) {
+	#sceneList {
+		width: 15%;
+		text-align: left;
+		margin-left: 3%;
+		padding-top: 31px;
+		li.active { 
+			display: block;
+			padding: 4px 0;
+			// opacity: 0;
+			// &.active { opacity: 1; }
+			// &.next { opacity: .66; }
+			// &.fringe { opacity: .33; }
+		}
+	}
+	#progressBar {
+		width: 70%;
+		left: 25%;
+	}
+}
+
+@media only screen and (min-width: 1280px) {
+
+}
+
+@media only screen and (min-width: 1400px) {
+
+}

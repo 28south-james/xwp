@@ -1,0 +1,29 @@
+/*
+  Scene animations
+  1600 ms total
+*/
+
+@keyframes overlayLoad {
+  25% { opacity: 0; }
+  100% { opacity: .35; }
+}
+
+@keyframes foregroundLoadIn {
+  0% { transform: translateY(50px); opacity: 0; }
+  100% { transform: translateY(0px); opacity: 1; }
+}
+
+@keyframes textLoadIn {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0px); opacity: 1; }
+}
+
+@keyframes textLoadOut {
+  0% { transform: translateY(0px); opacity: 1; }
+  100% { transform: translateY(-40px); opacity: 0; }
+}
+
+@keyframes buttonsLoadIn {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0px); opacity: 1; }
+}
